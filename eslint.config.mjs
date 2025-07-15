@@ -14,7 +14,7 @@ export default tseslint.config([
       ecmaVersion: 'latest',
       globals: globals.node,
       parserOptions: {
-        project: './tsconfig.json',
+        project: './tsconfig.lint.json',
       },
     },
     plugins: {
