@@ -14,7 +14,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "prepare": "husky",
+    "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky install; fi",
     "pre-commit": "npx lint-staged && npm run test",
     "commit": "cz",
     "release": "commit-and-tag-version"
