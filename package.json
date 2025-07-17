@@ -14,7 +14,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "prepare": "if [ \"$HUSKY\" != \"0\" ]; then husky install; fi",
+    "prepare": "node -e \"if (process.env.HUSKY !== '0') require('child_process').execSync('npx husky install', { stdio: 'inherit' })\"",
     "pre-commit": "npx lint-staged && npm run test",
     "commit": "cz",
     "release": "commit-and-tag-version"
