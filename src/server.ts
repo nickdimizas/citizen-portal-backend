@@ -3,10 +3,18 @@ import dotenv from 'dotenv';
 
 import app from './app';
 
-dotenv.config();
+if (process.env.NODE_ENV !== 'production') {
+  // Use dotenv to load .env during local dev
+  dotenv.config();
+}
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+
+if (!MONGO_URI) {
+  console.error('❌ MONGO_URI is not defined in the environment');
+  process.exit(1);
+}
 
 mongoose
   .connect(MONGO_URI)
