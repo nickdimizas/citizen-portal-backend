@@ -3,10 +3,7 @@ import dotenv from 'dotenv';
 
 import app from './app';
 
-if (process.env.NODE_ENV !== 'production') {
-  // Use dotenv to load .env during local dev
-  dotenv.config();
-}
+dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
