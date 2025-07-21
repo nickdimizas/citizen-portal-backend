@@ -9,7 +9,7 @@ COPY package*.json ./
 
 ENV HUSKY=0
 
-RUN npm install --omit=dev
+RUN npm ci
 
 COPY dist ./dist
 

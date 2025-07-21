@@ -14,10 +14,16 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "prepare": "node -e \"if (process.env.HUSKY !== '0') require('child_process').execSync('npx husky install', { stdio: 'inherit' })\"",
+    "prepare": "husky || exit 0",
     "pre-commit": "npx lint-staged && npm run test",
     "commit": "cz",
-    "release": "commit-and-tag-version"
+    "release": "commit-and-tag-version",
+    "build:docker": "npm i && npm run build && docker build -t citizen-portal-backend:prod .",
+    "run:docker": "docker run -d -p 5000:5000 --name backend-container --network citizen-net citizen-portal-backend:prod",
+    "db:run": "docker run -d --name citizen-mongo   -p 27017:27017   -v mongodb_data:/data/db   --network citizen-net   mongo:7.0",
+    "db:create": "docker run -d --name citizen-mongo -p 27017:27017   -e MONGO_INITDB_ROOT_USERNAME=admin   -e MONGO_INITDB_ROOT_PASSWORD=password   -v mongodb_data:/data/db   -v mongodb_config:/data/configdb   mongo:7.0",
+    "docker:network": "docker network create -d bridge citizen-net",
+    "docker:volume": "docker volume create mongodb_data"
   },
   "repository": {
     "type": "git",
