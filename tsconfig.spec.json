@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vitest", "node"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "isolatedModules": true
+  },
+  "include": ["src/**/*.test.ts", "tests/**/*.ts", "vitest.setup.ts"],
+  "exclude": ["dist", "node_modules"]
+}
