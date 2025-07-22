@@ -1,0 +1,36 @@
+# Environment variables
+.env*
+
+# Compiled output
+dist/
+build/
+
+# Dependency directories
+node_modules/
+
+# Test coverage reports
+coverage/
+
+# Test results or snapshots (optional, in case you use them)
+*.test.ts.snap
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE/Editor settings
+.vscode/
+.idea/
+*.sw?
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Optional: ignore Vitest cache if used
+.vitest/
