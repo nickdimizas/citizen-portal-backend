@@ -38,6 +38,9 @@ export default tseslint.config([
           alwaysTryTypes: true,
           project: './tsconfig.json',
         },
+        node: {
+          extensions: ['.js', '.ts', '.json'],
+        },
       },
     },
   },

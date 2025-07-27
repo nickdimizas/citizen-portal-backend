@@ -26,11 +26,3 @@ mongoose
     console.log('Failed to connect to MongoDB:', error);
     process.exit(1);
   });
-
-// process.on("SIGINT", () => {
-//   console.log("Received SIGINT. Closing MongoDB connection...");
-//   mongoose.connection.close(() => {
-//     console.log("MongoDB connection disconnected through app termination");
-//     process.exit(0);
-//   });
-// });

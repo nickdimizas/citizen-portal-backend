@@ -2,6 +2,8 @@ import express, { Application, Request, Response } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 
+import authRoutes from './routes/auth.routes';
+
 const app: Application = express();
 
 const swaggerOptions: Options = {
@@ -20,6 +22,8 @@ const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(express.json());
+
+app.use('/api/auth', authRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from the Express Typescript Backend!');
