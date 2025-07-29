@@ -4,7 +4,7 @@ import { createUser } from '../services/user.service';
 import { UserRole } from '../models/user.model';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { StatusCodes } from '../constants/statusCodes';
-import { login } from '../services/auth.service';
+import { login, generateAccessToken } from '../services/auth.service';
 
 const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -26,13 +26,16 @@ const register = async (req: Request, res: Response): Promise<void> => {
 const loginController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usernameOrEmail, password } = req.body;
-    await login(usernameOrEmail, password);
+    const user = await login(usernameOrEmail, password);
+    const token = generateAccessToken({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
 
-    console.log(`User logged in successfully: ${usernameOrEmail}`);
+    console.log(`User logged in successfully: ${user.username}`);
 
-    res
-      .status(StatusCodes.OK)
-      .json({ status: true, message: 'Login successful', data: { usernameOrEmail } });
+    res.status(StatusCodes.OK).json({ status: true, message: 'Login successful', data: { token } });
   } catch (error: unknown) {
     console.error('Login error:', error);
     const errorMessage = extractErrorMessage(error);
