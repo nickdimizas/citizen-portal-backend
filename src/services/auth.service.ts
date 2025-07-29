@@ -4,31 +4,7 @@ import { IUser } from '../models/user.model';
 import { findUser } from '../services/user.service';
 import { comparePasswords } from '../utils/password';
 import { extractErrorMessage } from '../utils/errorHandler';
-
-type JwtExpiresIn =
-  | number
-  | '1s'
-  | '10s'
-  | '30s'
-  | '1m'
-  | '10m'
-  | '15m'
-  | '30m'
-  | '1h'
-  | '2h'
-  | '6h'
-  | '12h'
-  | '1d'
-  | '2d'
-  | '7d'
-  | '14d'
-  | '30d';
-
-type TokenPayload = {
-  username: string;
-  email: string;
-  role: string;
-};
+import { TokenPayload, JwtExpiresIn } from '../types/index';
 
 const SECRET = process.env.JWT_SECRET as string;
 const EXPIRES_IN = process.env.JWT_EXPIRES_IN as JwtExpiresIn;
