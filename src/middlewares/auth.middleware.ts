@@ -1,10 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
 
 import { TokenPayload } from '../types';
 import { verifyAccessToken } from '../services/auth.service';
 import { StatusCodes } from '../constants/statusCodes';
 
-const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
+export interface AuthedticatedRequestBody {
+  user: TokenPayload;
+  [key: string]: any;
+}
+
+const verifyToken = (
+  req: Request<ParamsDictionary, any, AuthedticatedRequestBody>,
+  res: Response,
+  next: NextFunction,
+): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader?.startsWith('Bearer ')) {
     res
@@ -23,7 +33,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
     return;
   }
 
-  req.user = result.data as TokenPayload;
+  req.body._authUser = result.data as TokenPayload;
   next();
 };
 

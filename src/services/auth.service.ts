@@ -42,7 +42,7 @@ const verifyAccessToken = (token: string): { verified: boolean; data: TokenPaylo
     console.log('Token verified successfully:', payload);
     return { verified: true, data: payload };
   } catch (error: unknown) {
-    const errorMessage = extractErrorMessage(error);
+    const errorMessage = extractErrorMessage(error as Error);
     console.error('Token verification error:', errorMessage);
     return { verified: false, data: errorMessage };
   }

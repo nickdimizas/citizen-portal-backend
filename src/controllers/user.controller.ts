@@ -10,7 +10,7 @@ const createUserController = async (req: Request, res: Response) => {
     res.status(StatusCodes.CREATED).json({ status: true, message: 'User created successfully' });
   } catch (error) {
     console.error('User creation error', error);
-    const errorMessage = extractErrorMessage(error);
+    const errorMessage = extractErrorMessage(error as Error);
     res
       .status(StatusCodes.BAD_REQUEST)
       .json({ status: false, message: 'User creation failed', data: errorMessage });

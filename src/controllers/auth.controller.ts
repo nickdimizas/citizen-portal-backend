@@ -14,9 +14,9 @@ const register = async (req: Request, res: Response): Promise<void> => {
     res
       .status(StatusCodes.CREATED)
       .json({ status: true, message: 'User registered successfully', data: userData.username });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Registration error', error);
-    const errorMessage = extractErrorMessage(error);
+    const errorMessage = extractErrorMessage(error as Error);
     res
       .status(StatusCodes.BAD_REQUEST)
       .json({ status: false, message: 'User registration failed', data: errorMessage });
@@ -36,9 +36,9 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
     console.log(`User logged in successfully: ${user.username}`);
 
     res.status(StatusCodes.OK).json({ status: true, message: 'Login successful', data: { token } });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Login error:', error);
-    const errorMessage = extractErrorMessage(error);
+    const errorMessage = extractErrorMessage(error as Error);
     res
       .status(StatusCodes.UNAUTHORIZED)
       .json({ status: false, message: 'Login failed', data: errorMessage });
