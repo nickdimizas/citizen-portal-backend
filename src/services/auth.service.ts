@@ -9,6 +9,18 @@ import { TokenPayload, JwtExpiresIn } from '../types/index';
 const SECRET = process.env.JWT_SECRET as string;
 const EXPIRES_IN = process.env.JWT_EXPIRES_IN as JwtExpiresIn;
 
+type TokenVerificationSuccess = {
+  verified: true;
+  data: TokenPayload;
+};
+
+type TokenVerificationFailure = {
+  verified: false;
+  data: string;
+};
+
+export type TokenVerificationResult = TokenVerificationSuccess | TokenVerificationFailure;
+
 const login = async (usernameOrEmail: string, password: string): Promise<IUser> => {
   const user = await findUser(usernameOrEmail);
 
@@ -36,12 +48,12 @@ const generateAccessToken = (user: TokenPayload): string => {
   return token;
 };
 
-const verifyAccessToken = (token: string): { verified: boolean; data: TokenPayload | string } => {
+const verifyAccessToken = (token: string): TokenVerificationResult => {
   try {
     const payload = jwt.verify(token, SECRET) as TokenPayload;
     console.log('Token verified successfully:', payload);
     return { verified: true, data: payload };
-  } catch (error: unknown) {
+  } catch (error) {
     const errorMessage = extractErrorMessage(error as Error);
     console.error('Token verification error:', errorMessage);
     return { verified: false, data: errorMessage };
