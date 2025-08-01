@@ -6,7 +6,7 @@ import { extractErrorMessage } from '../utils/errorHandler';
 import { StatusCodes } from '../constants/statusCodes';
 import { login, generateAccessToken } from '../services/auth.service';
 
-const register = async (req: Request, res: Response): Promise<void> => {
+const registerController = async (req: Request, res: Response): Promise<void> => {
   try {
     const userData = { ...req.body, role: UserRole.Citizen };
     await createUser(userData);
@@ -45,4 +45,4 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { register, loginController };
+export { registerController, loginController };
