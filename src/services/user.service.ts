@@ -1,6 +1,11 @@
-import { User, IUser } from '../models/user.model';
+import { z } from 'zod';
 
-const createUser = async (data: IUser) => {
+import { User, IUser } from '../models/user.model';
+import { createUserValidator } from '../validators/user.validator';
+
+type CreateUserInput = z.infer<typeof createUserValidator>;
+
+const createUser = async (data: CreateUserInput) => {
   await User.create(data);
 };
 
