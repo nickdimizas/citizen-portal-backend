@@ -3,6 +3,7 @@ import { Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../services/auth.service';
 import { StatusCodes } from '../constants/statusCodes';
 import { AuthenticatedRequest } from '../types/authenticated-request';
+import { UserRole } from '../models/user.model';
 
 const verifyToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
@@ -30,4 +31,19 @@ const verifyToken = (req: AuthenticatedRequest, res: Response, next: NextFunctio
   next();
 };
 
-export { verifyToken };
+const verifyRole = (allowedRole: UserRole) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    const userRole = req.user?.role;
+
+    if (!userRole || userRole !== allowedRole) {
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ status: false, message: 'Forbidden: insufficient permissions' });
+      return;
+    }
+
+    next();
+  };
+};
+
+export { verifyToken, verifyRole };
