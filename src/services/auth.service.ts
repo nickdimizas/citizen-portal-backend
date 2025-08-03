@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 
 import { IUser } from '../models/user.model';
-import { findUser } from '../services/user.service';
+import { findUserByUsernameOrEmail } from '../services/user.service';
 import { comparePasswords } from '../utils/password';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { TokenPayload, JwtExpiresIn } from '../types/index';
@@ -22,7 +22,7 @@ type TokenVerificationFailure = {
 export type TokenVerificationResult = TokenVerificationSuccess | TokenVerificationFailure;
 
 const login = async (usernameOrEmail: string, password: string): Promise<IUser> => {
-  const user = await findUser(usernameOrEmail);
+  const user = await findUserByUsernameOrEmail(usernameOrEmail);
 
   if (!user) {
     throw new Error('User not found');

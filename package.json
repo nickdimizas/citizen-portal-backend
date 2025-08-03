@@ -24,7 +24,10 @@
     "db:run": "docker run -d --name citizen-mongo  -p 27017:27017  -v mongodb_data:/data/db  --network citizen-net  mongo:7.0",
     "build:docker": "npm i && npm run build && docker build -t citizen-portal-backend:prod .",
     "run:docker": "docker run -d -p 5000:5000 --name citizen-backend --network citizen-net citizen-portal-backend:prod",
-    "setup:docker": "npm run docker:network && npm run docker:volume && npm run db:create && npm run build:docker && npm run run:docker"
+    "setup:docker": "npm run docker:network && npm run docker:volume && npm run db:create && npm run build:docker && npm run run:docker",
+    "admin:seed:ts": "npx ts-node src/scripts/seedAdmin.ts",
+    "admin:seed:js": "node dist/scripts/seedAdmin.js",
+    "admin:seed:docker": "docker exec -it citizen-backend node dist/scripts/seedAdmin.js"
   },
   "repository": {
     "type": "git",

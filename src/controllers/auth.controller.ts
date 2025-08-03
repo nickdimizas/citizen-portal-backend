@@ -66,7 +66,7 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
     const errorMessage = extractErrorMessage(error as Error);
     res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ status: false, message: 'Login failed', data: errorMessage });
+      .json({ status: false, message: 'Invalid credentials', data: errorMessage });
   }
 };
 

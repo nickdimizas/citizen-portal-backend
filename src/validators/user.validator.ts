@@ -65,7 +65,7 @@ const loginValidator = z.object({
 });
 
 const createUserValidator = registerValidator.extend({
-  role: z.enum(UserRole),
+  role: z.enum(Object.values(UserRole) as [UserRole, ...UserRole[]]),
 });
 
 export { registerValidator, loginValidator, createUserValidator };
