@@ -11,24 +11,7 @@ const createUserByAdminController = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const trimmedBody = {
-      username: req.body.username.trim(),
-      email: req.body.email.trim(),
-      password: req.body.password.trim(),
-      role: req.body.role.trim(),
-      firstname: req.body.firstname.trim(),
-      lastname: req.body.lastname.trim(),
-      phoneNumber: req.body.phoneNumber.trim(),
-      address: {
-        city: req.body.address.city.trim(),
-        street: req.body.address.street.trim(),
-        number: req.body.address.number.trim(),
-        postcode: req.body.address.postcode.trim(),
-      },
-      ssn: req.body.ssn.trim(),
-    };
-
-    const validatedData = createUserValidator.parse(trimmedBody);
+    const validatedData = createUserValidator.parse(req.body);
     await createUser(validatedData);
     console.log(`User created successfully: ${validatedData.username} (${validatedData.role})`);
     res

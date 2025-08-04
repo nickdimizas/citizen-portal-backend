@@ -9,23 +9,8 @@ import { registerValidator, loginValidator } from '../validators/user.validator'
 
 const registerController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const trimmedBody = {
-      username: req.body.username.trim(),
-      email: req.body.email.trim(),
-      password: req.body.password.trim(),
-      firstname: req.body.firstname.trim(),
-      lastname: req.body.lastname.trim(),
-      phoneNumber: req.body.phoneNumber.trim(),
-      address: {
-        city: req.body.address.city.trim(),
-        street: req.body.address.street.trim(),
-        number: req.body.address.number.trim(),
-        postcode: req.body.address.postcode.trim(),
-      },
-      ssn: req.body.ssn.trim(),
-    };
+    const validatedData = registerValidator.parse(req.body);
 
-    const validatedData = registerValidator.parse(trimmedBody);
     const userData = { ...validatedData, role: UserRole.Citizen };
     await createUser(userData);
     console.log('User created successfully:', userData.username);
@@ -43,13 +28,7 @@ const registerController = async (req: Request, res: Response): Promise<void> =>
 
 const loginController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const trimmedBody = {
-      usernameOrEmail:
-        typeof req.body.usernameOrEmail === 'string' ? req.body.usernameOrEmail.trim() : '',
-      password: typeof req.body.password === 'string' ? req.body.password.trim() : '',
-    };
-
-    const validatedData = loginValidator.parse(trimmedBody);
+    const validatedData = loginValidator.parse(req.body);
 
     const user = await login(validatedData.usernameOrEmail, validatedData.password);
 
@@ -69,7 +48,7 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
       })
       .status(StatusCodes.OK)
-      .json({ status: true, message: 'Login successful', data: { token } });
+      .json({ status: true, message: 'Login successful' });
   } catch (error) {
     console.error('Login error:', error);
     const errorMessage = extractErrorMessage(error as Error);
