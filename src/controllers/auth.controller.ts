@@ -52,6 +52,7 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
     const validatedData = loginValidator.parse(trimmedBody);
 
     const user = await login(validatedData.usernameOrEmail, validatedData.password);
+
     const token = generateAccessToken({
       username: user.username,
       email: user.email,
@@ -60,7 +61,15 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
 
     console.log(`User logged in successfully: ${user.username}`);
 
-    res.status(StatusCodes.OK).json({ status: true, message: 'Login successful', data: { token } });
+    res
+      .cookie('token', token, {
+        httpOnly: true,
+        // secure: process.env.NODE_ENV === 'production', // use HTTPS in production
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+      })
+      .status(StatusCodes.OK)
+      .json({ status: true, message: 'Login successful', data: { token } });
   } catch (error) {
     console.error('Login error:', error);
     const errorMessage = extractErrorMessage(error as Error);
