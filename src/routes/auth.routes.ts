@@ -1,6 +1,10 @@
 import { Router } from 'express';
 
-import { registerController, loginController } from '../controllers/auth.controller';
+import {
+  registerController,
+  loginController,
+  logoutController,
+} from '../controllers/auth.controller';
 import { verifyToken, verifyRole } from '../middlewares/auth.middleware';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { UserRole } from '../models/user.model';
@@ -9,6 +13,7 @@ const router = Router();
 
 router.post('/register', registerController);
 router.post('/login', loginController);
+router.post('/logout', logoutController);
 
 router.get('/protected', verifyToken, (req: AuthenticatedRequest, res) => {
   return res.json({
