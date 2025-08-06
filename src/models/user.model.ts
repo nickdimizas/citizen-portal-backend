@@ -24,6 +24,7 @@ interface IUser extends Document {
   phoneNumber: string;
   address: Address;
   ssn: string;
+  active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -125,6 +126,10 @@ const userSchema: Schema<IUser> = new Schema(
       unique: true,
       trim: true,
       match: [/^\d{9}$/, 'SSN must be exactly 9 digits'],
+    },
+    active: {
+      type: Boolean,
+      default: true,
     },
   },
   { collection: 'users', timestamps: true },

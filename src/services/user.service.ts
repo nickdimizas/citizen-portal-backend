@@ -10,7 +10,13 @@ const createUser = async (data: CreateUserInput) => {
   const existingUser = await findUserByAnyUniqueField(username, email, ssn);
 
   if (existingUser) {
-    throw new Error('User with provided username, email, or ssn already exists');
+    if (!existingUser.active) {
+      throw new Error(
+        'An account with this email, username, or SSN exists but is currently inactive. Please contact support.',
+      );
+    }
+
+    throw new Error('User with provided username, email, or SSN already exists');
   }
 
   await User.create(data);

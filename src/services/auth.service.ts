@@ -27,6 +27,11 @@ const login = async (usernameOrEmail: string, password: string): Promise<IUser> 
   if (!user) {
     throw new Error('User not found');
   }
+
+  if (!user.active) {
+    throw new Error('User account is inactive');
+  }
+
   const isPasswordValid = await comparePasswords(password, user?.password || '');
 
   if (!isPasswordValid) {

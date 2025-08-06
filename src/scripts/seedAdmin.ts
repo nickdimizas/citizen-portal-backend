@@ -37,6 +37,7 @@ async function seedAdmin() {
         postcode: '00000',
       },
       ssn: '012345678',
+      active: true,
     };
 
     await User.create(adminUser);
