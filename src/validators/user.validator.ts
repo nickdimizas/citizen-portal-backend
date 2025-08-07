@@ -102,4 +102,53 @@ const createUserValidator = registerValidator
   })
   .strict();
 
-export { registerValidator, loginValidator, createUserValidator };
+const getUsersQueryValidator = z.object({
+  roleFilter: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim())
+    .transform((val) => (val ? val.split(',').map((role) => role.trim()) : undefined))
+    .transform((roles) => {
+      if (!roles) return undefined;
+      const validRoles = Object.values(UserRole);
+      return roles.filter((role) => validRoles.includes(role as UserRole)) as UserRole[];
+    }),
+  active: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val?.trim() === 'true') return true;
+      if (val?.trim() === 'false') return false;
+      return undefined;
+    }),
+  sortBy: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim() || 'createdAt'),
+  sortOrder: z
+    .string()
+    .optional()
+    .transform((val) => (val?.trim().toLowerCase() === 'desc' ? 'desc' : 'asc')),
+  page: z
+    .string()
+    .optional()
+    .transform((val) => {
+      const trimmed = val?.trim();
+      const parsed = Number(trimmed);
+      return !isNaN(parsed) && parsed > 0 ? parsed : 1;
+    }),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => {
+      const trimmed = val?.trim();
+      const parsed = Number(trimmed);
+      return !isNaN(parsed) && parsed > 0 ? parsed : 10;
+    }),
+  search: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim()),
+});
+
+export { registerValidator, loginValidator, createUserValidator, getUsersQueryValidator };

@@ -5,6 +5,7 @@ import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
+import employeeRoutes from './routes/employee.routes';
 
 const app: Application = express();
 
@@ -28,6 +29,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/employee', employeeRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from the Express Typescript Backend!');
