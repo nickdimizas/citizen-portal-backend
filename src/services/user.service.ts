@@ -45,6 +45,10 @@ const findUserByAnyUniqueField = async (
   return User.findOne({ $or: conditions });
 };
 
+const getUserById = async (id: string): Promise<IUser | null> => {
+  return User.findById(id).select('-password -__v');
+};
+
 const getUsers = async (options: GetUsersOptions): Promise<UserPaginationResult> => {
   const {
     roleFilter,
@@ -97,4 +101,4 @@ const getUsers = async (options: GetUsersOptions): Promise<UserPaginationResult>
   };
 };
 
-export { createUser, findUserByUsernameOrEmail, findUserByAnyUniqueField, getUsers };
+export { createUser, findUserByUsernameOrEmail, findUserByAnyUniqueField, getUsers, getUserById };
