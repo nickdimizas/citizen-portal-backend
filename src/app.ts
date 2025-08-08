@@ -4,9 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 
 import authRoutes from './routes/auth.routes';
-import adminRoutes from './routes/admin.routes';
-import employeeRoutes from './routes/employee.routes';
-
+import userRoutes from './routes/user.routes';
 const app: Application = express();
 
 const swaggerOptions: Options = {
@@ -27,9 +25,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/employee', employeeRoutes);
+app.use('/api', authRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from the Express Typescript Backend!');

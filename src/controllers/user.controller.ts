@@ -2,7 +2,7 @@ import { Response } from 'express';
 
 import { StatusCodes } from '../constants/statusCodes';
 import { UserRole } from '../models/user.model';
-import { getUserById, getUsers } from '../services/user.service';
+import { getUserByEmail, getUserById, getUsers } from '../services/user.service';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { extractErrorMessage } from '../utils/errorHandler';
 import { getUsersQueryValidator } from '../validators/user.validator';
@@ -89,4 +89,42 @@ const getUserByIdController = async (req: AuthenticatedRequest, res: Response): 
   }
 };
 
-export { getUsersController, getUserByIdController };
+const getUserProfileController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    if (!req.user || !req.user.email) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized: User data missing',
+      });
+      return;
+    }
+    const user = await getUserByEmail(req.user.email);
+
+    if (!user) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      status: true,
+      message: 'User profile fetched successfully',
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    const errorMessage = extractErrorMessage(error as Error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: 'Failed to fetch user profile',
+      error: errorMessage,
+    });
+  }
+};
+
+export { getUsersController, getUserByIdController, getUserProfileController };

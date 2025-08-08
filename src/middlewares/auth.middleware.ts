@@ -55,14 +55,16 @@ const verifyToken = async (
   }
 };
 
-const verifyRole = (allowedRole: UserRole) => {
+const verifyRole = (allowedRoles: UserRole | UserRole[]) => {
+  const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
   return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    const userRole = req.user?.role;
+    const userRole = req.user?.role as UserRole | undefined;
 
-    if (!userRole || userRole !== allowedRole) {
-      res
-        .status(StatusCodes.FORBIDDEN)
-        .json({ status: false, message: 'Forbidden: insufficient permissions' });
+    if (!userRole || !rolesArray.includes(userRole)) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        status: false,
+        message: 'Forbidden: insufficient permissions',
+      });
       return;
     }
 
