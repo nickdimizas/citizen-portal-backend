@@ -1,29 +1,33 @@
 import { Router } from 'express';
 
 import { verifyToken, verifyRole } from '../middlewares/auth.middleware';
-import { createUserByAdminController } from '../controllers/admin.controller';
 import {
+  createUserController,
   getUsersController,
-  getUserByIdController,
-  getUserProfileController,
+  updateUserController,
+  getUserController,
 } from '../controllers/user.controller';
 import { UserRole } from '../models/user.model';
 
 const router = Router();
 
+router.get('/', verifyToken, verifyRole([UserRole.Admin, UserRole.Employee]), getUsersController);
 router.post(
   '/',
   verifyToken,
   verifyRole([UserRole.Admin, UserRole.Employee]),
-  createUserByAdminController,
+  createUserController,
 );
-router.get('/', verifyToken, verifyRole([UserRole.Admin, UserRole.Employee]), getUsersController);
-router.get('/me', verifyToken, getUserProfileController);
-router.get(
+
+router.get('/me', verifyToken, getUserController);
+router.post('/me', verifyToken, updateUserController);
+
+router.get('/:id', verifyToken, verifyRole([UserRole.Admin, UserRole.Employee]), getUserController);
+router.post(
   '/:id',
   verifyToken,
   verifyRole([UserRole.Admin, UserRole.Employee]),
-  getUserByIdController,
+  updateUserController,
 );
 
 export default router;

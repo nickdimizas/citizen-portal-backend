@@ -1,10 +1,9 @@
 import { Response, NextFunction } from 'express';
 
 import { verifyAccessToken } from '../services/auth.service';
-import { findUserByUsernameOrEmail } from '../services/user.service';
 import { StatusCodes } from '../constants/statusCodes';
 import { AuthenticatedRequest } from '../types/authenticated-request';
-import { UserRole } from '../models/user.model';
+import { User, UserRole } from '../models/user.model';
 import { extractErrorMessage } from '../utils/errorHandler';
 
 const verifyToken = async (
@@ -16,6 +15,7 @@ const verifyToken = async (
     const token = req.cookies?.token;
 
     if (!token) {
+      console.warn('Access denied: no token provided');
       res.status(StatusCodes.UNAUTHORIZED).json({
         status: false,
         message: 'Access denied. No token provided.',
@@ -26,6 +26,7 @@ const verifyToken = async (
     const result = verifyAccessToken(token);
 
     if (!result.verified) {
+      console.warn('Invalid or expired token:', result.data);
       res.status(StatusCodes.FORBIDDEN).json({
         status: false,
         message: 'Invalid or expired token.',
@@ -34,8 +35,9 @@ const verifyToken = async (
       return;
     }
 
-    const dbUser = await findUserByUsernameOrEmail(result.data.username);
+    const dbUser = await User.findById(result.data.id);
     if (!dbUser || !dbUser.active) {
+      console.warn(`User inactive or missing: ${result.data.id}`);
       res.status(StatusCodes.UNAUTHORIZED).json({
         status: false,
         message: 'User is inactive or no longer exists.',
@@ -46,6 +48,7 @@ const verifyToken = async (
     req.user = result.data;
     next();
   } catch (error) {
+    console.error('Internal error while verifying token:', error);
     const errorMessage = extractErrorMessage(error as Error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       status: false,
@@ -61,6 +64,7 @@ const verifyRole = (allowedRoles: UserRole | UserRole[]) => {
     const userRole = req.user?.role as UserRole | undefined;
 
     if (!userRole || !rolesArray.includes(userRole)) {
+      console.warn(`Forbidden: role ${userRole} not in allowed roles`);
       res.status(StatusCodes.FORBIDDEN).json({
         status: false,
         message: 'Forbidden: insufficient permissions',

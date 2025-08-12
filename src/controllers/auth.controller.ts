@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ZodError } from 'zod';
 
 import { createUser } from '../services/user.service';
 import { UserRole } from '../models/user.model';
@@ -13,16 +14,27 @@ const registerController = async (req: Request, res: Response): Promise<void> =>
 
     const userData = { ...validatedData, role: UserRole.Citizen };
     await createUser(userData);
-    console.log('User created successfully:', userData.username);
+    console.log(`User registered successfully: ${userData.username}`);
     res
       .status(StatusCodes.CREATED)
       .json({ status: true, message: 'User registered successfully', data: userData.username });
   } catch (error) {
-    console.error('Registration error', error);
-    const errorMessage = extractErrorMessage(error as Error);
+    console.error('User registration error:', error);
+
+    let errorData: { field: string; message: string }[] = [];
+
+    if (error instanceof ZodError) {
+      errorData = error.issues.map((i) => ({
+        field: i.path.join('.'),
+        message: i.message,
+      }));
+    } else {
+      errorData.push({ field: '', message: extractErrorMessage(error as Error) });
+    }
+
     res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ status: false, message: 'User registration failed', data: errorMessage });
+      .json({ status: false, message: 'User registration failed', data: errorData });
   }
 };
 
@@ -33,6 +45,7 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
     const user = await login(validatedData.usernameOrEmail, validatedData.password);
 
     const token = generateAccessToken({
+      id: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
@@ -50,11 +63,22 @@ const loginController = async (req: Request, res: Response): Promise<void> => {
       .status(StatusCodes.OK)
       .json({ status: true, message: 'Login successful' });
   } catch (error) {
-    console.error('Login error:', error);
-    const errorMessage = extractErrorMessage(error as Error);
+    console.error('User login error:', error);
+
+    let errorData: { field: string; message: string }[] = [];
+
+    if (error instanceof ZodError) {
+      errorData = error.issues.map((i) => ({
+        field: i.path.join('.'),
+        message: i.message,
+      }));
+    } else {
+      errorData.push({ field: '', message: extractErrorMessage(error as Error) });
+    }
+
     res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ status: false, message: 'Login failed', data: errorMessage });
+      .json({ status: false, message: 'Login failed', data: errorData });
   }
 };
 

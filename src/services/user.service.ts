@@ -1,36 +1,20 @@
-import { z } from 'zod';
 import { FilterQuery } from 'mongoose';
 
 import { User, IUser } from '../models/user.model';
-import { createUserValidator } from '../validators/user.validator';
+import { CreateUserInput, UpdateUserInput } from '../validators/user.validator';
 import { GetUsersOptions, UserPaginationResult } from '../types/user';
 
-type CreateUserInput = z.infer<typeof createUserValidator>;
-
-const createUser = async (data: CreateUserInput) => {
-  const { username, email, ssn } = data;
-  const existingUser = await findUserByAnyUniqueField(username, email, ssn);
-
-  if (existingUser) {
-    if (!existingUser.active) {
-      throw new Error(
-        'An account with this email, username, or SSN exists but is currently inactive. Please contact support.',
-      );
-    }
-
-    throw new Error('User with provided username, email, or SSN already exists');
-  }
-
-  await User.create(data);
+const getUserById = async (id: string): Promise<IUser | null> => {
+  return User.findById(id).select('-password -__v');
 };
 
-const findUserByUsernameOrEmail = async (usernameOrEmail: string): Promise<IUser | null> => {
+const getUserByUsernameOrEmail = async (usernameOrEmail: string): Promise<IUser | null> => {
   return User.findOne({
     $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
   });
 };
 
-const findUserByAnyUniqueField = async (
+const getUserByAnyUniqueField = async (
   username?: string,
   email?: string,
   ssn?: string,
@@ -45,12 +29,23 @@ const findUserByAnyUniqueField = async (
   return User.findOne({ $or: conditions });
 };
 
-const getUserById = async (id: string): Promise<IUser | null> => {
-  return User.findById(id).select('-password -__v');
-};
+const createUser = async (data: CreateUserInput) => {
+  const { username, email, ssn } = data;
+  const existingUser = await getUserByAnyUniqueField(username, email, ssn);
 
-const getUserByEmail = async (email: string): Promise<IUser | null> => {
-  return User.findOne({ email }).select('-password -__v');
+  if (existingUser) {
+    if (!existingUser.active) {
+      console.warn('An account with this email, username, or SSN exists but is currently inactive');
+      throw new Error(
+        'An account with this email, username, or SSN exists but is currently inactive. Please contact support.',
+      );
+    }
+
+    console.warn('User with provided username, email, or SSN already exists');
+    throw new Error('User with provided username, email, or SSN already exists');
+  }
+
+  await User.create(data);
 };
 
 const getUsers = async (options: GetUsersOptions): Promise<UserPaginationResult> => {
@@ -105,11 +100,43 @@ const getUsers = async (options: GetUsersOptions): Promise<UserPaginationResult>
   };
 };
 
+const updateUser = async (userId: string, data: UpdateUserInput): Promise<UpdateUserInput> => {
+  if (data.username || data.email || data.ssn) {
+    const existingUser = await getUserByAnyUniqueField(data.username, data.email, data.ssn);
+
+    if (existingUser && existingUser.id !== userId) {
+      if (existingUser.username === data.username) {
+        console.warn('Username already exists');
+        throw new Error('Username already exists');
+      }
+      if (existingUser.email === data.email) {
+        console.warn('Email already exists');
+        throw new Error('Email already exists');
+      }
+      if (existingUser.ssn === data.ssn) {
+        console.warn('SSN already exists');
+        throw new Error('SSN already exists');
+      }
+    }
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    console.warn(`User not found for id ${userId}`);
+    throw new Error('User not found');
+  }
+
+  Object.assign(user, data);
+  await user.save();
+
+  return data;
+};
+
 export {
   createUser,
-  findUserByUsernameOrEmail,
-  findUserByAnyUniqueField,
+  getUserByUsernameOrEmail,
+  getUserByAnyUniqueField,
   getUsers,
   getUserById,
-  getUserByEmail,
+  updateUser,
 };

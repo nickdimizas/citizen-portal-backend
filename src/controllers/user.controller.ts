@@ -1,26 +1,88 @@
 import { Response } from 'express';
+import { ZodError } from 'zod';
 
 import { StatusCodes } from '../constants/statusCodes';
-import { UserRole } from '../models/user.model';
-import { getUserByEmail, getUserById, getUsers } from '../services/user.service';
+import { IUser, UserRole } from '../models/user.model';
+import { createUser, getUserById, getUsers, updateUser } from '../services/user.service';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { extractErrorMessage } from '../utils/errorHandler';
-import { getUsersQueryValidator } from '../validators/user.validator';
+import {
+  createUserValidator,
+  getUsersQueryValidator,
+  updateUserValidator,
+} from '../validators/user.validator';
+
+const createUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized: Missing user information',
+      });
+      return;
+    }
+
+    console.log(`Create user requested by userId: ${req.user?.id}, role: ${req.user?.role}`);
+
+    if (req.user.role === UserRole.Employee && req.body.role !== UserRole.Citizen) {
+      console.warn(
+        `Role restriction: Employee with id: ${req.user.id} attempted to create a user with role "${req.body.role}".`,
+      );
+      res.status(StatusCodes.FORBIDDEN).json({
+        status: false,
+        message: 'Employees are only allowed to create citizens',
+      });
+      return;
+    }
+
+    const inputData = {
+      ...req.body,
+      role:
+        req.user.role === UserRole.Employee && !req.body.role ? UserRole.Citizen : req.body.role,
+    };
+
+    const validatedData = createUserValidator.parse(inputData);
+    console.log(`Validated create user data`);
+
+    await createUser(validatedData);
+    console.log(`User created successfully: ${validatedData.username} (${validatedData.role})`);
+    res
+      .status(StatusCodes.CREATED)
+      .json({ status: true, message: 'User created successfully', data: validatedData.username });
+  } catch (error) {
+    console.error('User creation error:', error);
+
+    let errorData: { field: string; message: string }[] = [];
+
+    if (error instanceof ZodError) {
+      errorData = error.issues.map((i) => ({
+        field: i.path.join('.'),
+        message: i.message,
+      }));
+    } else {
+      errorData.push({ field: '', message: extractErrorMessage(error as Error) });
+    }
+
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ status: false, message: 'User creation failed', data: errorData });
+  }
+};
 
 const getUsersController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userRole = req.user?.role;
+    console.log(`Fetching users - requester role: ${userRole}`);
 
-    // Parse and validate query
     const query = getUsersQueryValidator.parse(req.query);
 
-    // Determine allowed roles based on current user
     let allowedRoles: UserRole[] | undefined;
     if (userRole === UserRole.Employee) {
       allowedRoles = [UserRole.Citizen];
     } else if (userRole === UserRole.Admin) {
-      allowedRoles = query.roleFilter; // Admin can filter anything
+      allowedRoles = query.roleFilter;
     } else {
+      console.warn(`Forbidden access attempt to getUsers by role: ${userRole}`);
       res.status(StatusCodes.FORBIDDEN).json({
         status: false,
         message: 'Forbidden',
@@ -34,6 +96,7 @@ const getUsersController = async (req: AuthenticatedRequest, res: Response): Pro
       roleFilter: allowedRoles,
     });
 
+    console.log(`Users fetched successfully for role ${userRole}`);
     res.status(StatusCodes.OK).json({
       status: true,
       message: 'Users fetched successfully',
@@ -50,14 +113,28 @@ const getUsersController = async (req: AuthenticatedRequest, res: Response): Pro
   }
 };
 
-const getUserByIdController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    const requestingUserRole = req.user?.role;
+    // ✅ Ensure user is authenticated
+    if (!req.user) {
+      console.warn('Unauthorized access attempt: missing user object');
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized',
+      });
+      return;
+    }
 
-    const user = await getUserById(id);
+    // ✅ Decide target user ID based on role & route
+    const isSelfRequest = !req.params.id || req.user.role === UserRole.Citizen;
+    const targetUserId = isSelfRequest ? req.user.id : req.params.id;
+
+    console.log(`Fetching user ${targetUserId} - requested by ${req.user.id} (${req.user.role})`);
+
+    const user = await getUserById(targetUserId);
 
     if (!user) {
+      console.warn(`User with id ${targetUserId} not found`);
       res.status(StatusCodes.NOT_FOUND).json({
         status: false,
         message: 'User not found',
@@ -65,7 +142,9 @@ const getUserByIdController = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
-    if (requestingUserRole === UserRole.Employee && user.role !== UserRole.Citizen) {
+    // ✅ Restrict employees from accessing non-citizens (unless self-request)
+    if (!isSelfRequest && req.user.role === UserRole.Employee && user.role !== UserRole.Citizen) {
+      console.warn(`Forbidden access: employee ${req.user.id} tried to access ${targetUserId}`);
       res.status(StatusCodes.FORBIDDEN).json({
         status: false,
         message: 'Forbidden: Employees can only access citizen profiles',
@@ -73,10 +152,20 @@ const getUserByIdController = async (req: AuthenticatedRequest, res: Response): 
       return;
     }
 
+    // ✅ Adjust response data for self vs others
+    let responseData;
+    if (isSelfRequest) {
+      const { username, email, firstname, lastname, phoneNumber, address, ssn } = user;
+      responseData = { username, email, firstname, lastname, phoneNumber, address, ssn };
+    } else {
+      responseData = user;
+    }
+
+    console.log(`User ${targetUserId} fetched successfully`);
     res.status(StatusCodes.OK).json({
       status: true,
-      message: 'User fetched successfully',
-      data: user,
+      message: isSelfRequest ? 'Your profile fetched successfully' : 'User fetched successfully',
+      data: responseData,
     });
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -89,42 +178,98 @@ const getUserByIdController = async (req: AuthenticatedRequest, res: Response): 
   }
 };
 
-const getUserProfileController = async (
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> => {
+const updateUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user || !req.user.email) {
+    if (!req.user?.id || !req.user?.role) {
+      console.warn('Unauthorized update attempt: missing user id or role');
       res.status(StatusCodes.UNAUTHORIZED).json({
         status: false,
-        message: 'Unauthorized: User data missing',
-      });
-      return;
-    }
-    const user = await getUserByEmail(req.user.email);
-
-    if (!user) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        status: false,
-        message: 'User not found',
+        message: 'Unauthorized: Missing user data in request',
       });
       return;
     }
 
+    const targetUserId = req.params.id && req.user.role !== 'citizen' ? req.params.id : req.user.id;
+    console.log(`Update user requested by ${req.user.id} for target user ${targetUserId}`);
+
+    const targetUser = await getUserById(targetUserId);
+    if (!targetUser) {
+      console.warn(`Update failed: target user ${targetUserId} not found`);
+      res.status(404).json({ status: false, message: 'User not found' });
+      return;
+    }
+
+    if (req.user.role === 'citizen' && targetUserId !== req.user.id) {
+      console.warn(`Forbidden update attempt by citizen ${req.user.id} on user ${targetUserId}`);
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ status: false, message: 'Forbidden: You dont have permission' });
+      return;
+    }
+
+    if (req.user.role === 'employee' && targetUser.role !== 'citizen') {
+      console.warn(
+        `Forbidden update attempt by employee ${req.user.id} on non-citizen user ${targetUserId}`,
+      );
+      res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ status: false, message: 'Forbidden: You dont have permission' });
+      return;
+    }
+
+    const validatedData = updateUserValidator.parse(req.body);
+    console.log(`Validated data for update by ${req.user.id} on user ${targetUserId}`);
+
+    const targetUserObj: Partial<IUser> = targetUser.toObject();
+
+    const validatedPartialData = validatedData as Partial<IUser>;
+
+    const hasChanges = Object.keys(validatedPartialData).some((key) => {
+      const inputKey = key as keyof IUser;
+
+      if (!(inputKey in targetUserObj)) return false;
+
+      return (
+        JSON.stringify(validatedPartialData[inputKey]) !== JSON.stringify(targetUserObj[inputKey])
+      );
+    });
+
+    if (!hasChanges) {
+      res.status(StatusCodes.OK).json({
+        status: true,
+        message: 'Nothing to update',
+      });
+      return;
+    }
+
+    const updatedUser = await updateUser(targetUserId, validatedData);
+
+    console.log(`User ${targetUserId} updated successfully by ${req.user.id}`);
     res.status(StatusCodes.OK).json({
       status: true,
-      message: 'User profile fetched successfully',
-      data: user,
+      message: 'User updated successfully',
+      data: updatedUser,
     });
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    const errorMessage = extractErrorMessage(error as Error);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    console.error('Update user error:', error);
+
+    let errorData: { field: string; message: string }[] = [];
+
+    if (error instanceof ZodError) {
+      errorData = error.issues.map((i) => ({
+        field: i.path.join('.'),
+        message: i.message,
+      }));
+    } else {
+      errorData.push({ field: '', message: extractErrorMessage(error as Error) });
+    }
+
+    res.status(StatusCodes.BAD_REQUEST).json({
       status: false,
-      message: 'Failed to fetch user profile',
-      error: errorMessage,
+      message: 'Failed to update user',
+      error: errorData,
     });
   }
 };
 
-export { getUsersController, getUserByIdController, getUserProfileController };
+export { getUsersController, getUserController, updateUserController, createUserController };
