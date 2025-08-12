@@ -6,6 +6,9 @@ import {
   getUsersController,
   updateUserController,
   getUserController,
+  toggleUserActiveController,
+  changeUserRoleController,
+  changePasswordController,
 } from '../controllers/user.controller';
 import { UserRole } from '../models/user.model';
 
@@ -20,14 +23,17 @@ router.post(
 );
 
 router.get('/me', verifyToken, getUserController);
-router.post('/me', verifyToken, updateUserController);
+router.patch('/me', verifyToken, updateUserController);
+router.patch('/me/password', verifyToken, changePasswordController);
 
 router.get('/:id', verifyToken, verifyRole([UserRole.Admin, UserRole.Employee]), getUserController);
-router.post(
+router.patch(
   '/:id',
   verifyToken,
   verifyRole([UserRole.Admin, UserRole.Employee]),
   updateUserController,
 );
+router.patch('/:id/active', verifyToken, verifyRole([UserRole.Admin]), toggleUserActiveController);
+router.patch('/:id/role', verifyToken, verifyRole([UserRole.Admin]), changeUserRoleController);
 
 export default router;

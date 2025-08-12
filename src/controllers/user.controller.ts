@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { ZodError } from 'zod';
 
 import { StatusCodes } from '../constants/statusCodes';
-import { IUser, UserRole } from '../models/user.model';
+import { IUser, User, UserRole } from '../models/user.model';
 import { createUser, getUserById, getUsers, updateUser } from '../services/user.service';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { extractErrorMessage } from '../utils/errorHandler';
@@ -10,7 +10,9 @@ import {
   createUserValidator,
   getUsersQueryValidator,
   updateUserValidator,
+  changePasswordValidator,
 } from '../validators/user.validator';
+import { comparePasswords } from '../utils/password';
 
 const createUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
@@ -272,4 +274,170 @@ const updateUserController = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
-export { getUsersController, getUserController, updateUserController, createUserController };
+const toggleUserActiveController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const user = await getUserById(id);
+
+    if (!user) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    // Toggle the active field
+    user.active = !user.active;
+    await user.save();
+
+    res.status(StatusCodes.OK).json({
+      status: true,
+      message: user.active
+        ? `User ${user.username} reactivated successfully`
+        : `User ${user.username} deactivated successfully`,
+      data: {
+        id: user.id,
+        username: user.username,
+        active: user.active,
+      },
+    });
+  } catch (error) {
+    console.error('Error toggling user active status:', error);
+    const errorMessage = extractErrorMessage(error as Error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: 'Failed to toggle user active status',
+      error: errorMessage,
+    });
+  }
+};
+
+const changeUserRoleController = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!Object.values(UserRole).includes(role)) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        status: false,
+        message: 'Invalid role',
+      });
+      return;
+    }
+
+    const user = await getUserById(id);
+
+    if (!user) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.status(StatusCodes.OK).json({
+      status: true,
+      message: `Role for ${user.username} changed to ${role}`,
+      data: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Error changing user role:', error);
+    const errorMessage = extractErrorMessage(error as Error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: 'Failed to change role',
+      error: errorMessage,
+    });
+  }
+};
+
+const changePasswordController = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = changePasswordValidator.parse(req.body);
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      console.warn('No user ID in request');
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const user = await User.findById(userId);
+    console.log('User fetched from DB:', user ? user.username : null);
+
+    if (!user) {
+      console.warn('User not found with id:', userId);
+      return res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: 'User not found',
+      });
+    }
+
+    const isMatch = await comparePasswords(currentPassword, user.password);
+    console.log('Password match result:', isMatch);
+
+    if (!isMatch) {
+      console.warn('Current password incorrect');
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Current password is incorrect',
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    console.log('Password updated successfully for user:', user.username);
+    res.status(StatusCodes.OK).json({
+      status: true,
+      message: 'Password updated successfully',
+    });
+  } catch (error) {
+    console.error('Error in changePasswordController:', error);
+
+    let errorData: { field: string; message: string }[] = [];
+
+    if (error instanceof ZodError) {
+      errorData = error.issues.map((i) => ({
+        field: i.path.join('.'),
+        message: i.message,
+      }));
+    } else {
+      errorData.push({ field: '', message: extractErrorMessage(error as Error) });
+    }
+
+    res.status(StatusCodes.BAD_REQUEST).json({
+      status: false,
+      message: 'Failed to update password',
+      error: errorData,
+    });
+  }
+};
+
+export {
+  getUsersController,
+  getUserController,
+  updateUserController,
+  createUserController,
+  toggleUserActiveController,
+  changeUserRoleController,
+  changePasswordController,
+};
