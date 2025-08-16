@@ -10,11 +10,13 @@ const registerValidator = z
   .object({
     username: z
       .string()
+      .min(1, { message: 'Username is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 2, { message: 'Username must be at least 2 characters' })
       .refine((val) => val.length <= 20, { message: 'Username must be at most 20 characters' }),
     email: z
       .string()
+      .min(1, { message: 'Email is required' })
       .transform((str) => str.trim())
       .refine(
         (val) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/.test(val),
@@ -22,6 +24,7 @@ const registerValidator = z
       ),
     password: z
       .string()
+      .min(1, { message: 'Password is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 8, { message: 'Password must be at least 8 characters' })
       .refine((val) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])/.test(val), {
@@ -30,43 +33,49 @@ const registerValidator = z
       }),
     firstname: z
       .string()
+      .min(1, { message: 'First Name is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 2, { message: 'Firstname must be at least 2 characters' })
       .refine((val) => val.length <= 50, { message: 'Firstname must be at most 50 characters' }),
     lastname: z
       .string()
+      .min(1, { message: 'Last Name is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 2, { message: 'Lastname must be at least 2 characters' })
       .refine((val) => val.length <= 50, { message: 'Lastname must be at most 50 characters' }),
     phoneNumber: z
       .string()
+      .min(1, { message: 'Phone number is required' })
       .transform((str) => str.trim())
       .refine((val) => /^\d{10}$/.test(val), { message: 'Phone number must be exactly 10 digits' }),
     address: z.object({
       city: z
         .string()
+        .min(1, { message: 'City is required' })
         .transform((str) => str.trim())
         .refine((val) => val.length >= 2, { message: 'City must be at least 2 characters' })
         .refine((val) => val.length <= 50, { message: 'City must be at most 50 characters' }),
       street: z
         .string()
-        .nonempty({ message: 'Street cannot be empty' })
+        .min(1, { message: 'Street is required' })
         .transform((str) => str.trim())
         .refine((val) => val.length <= 50, { message: 'Street must be at most 50 characters' }),
       number: z
         .string()
-        .nonempty({ message: 'Street number cannot be empty' })
+        .min(1, { message: 'Street number is required' })
         .refine((val) => val.length <= 10, {
           message: 'Street number must be at most 10 characters',
         }),
       postcode: z
         .string()
+        .min(1, { message: 'Postcode is required' })
         .transform((str) => str.trim())
         .refine((val) => /^\d{5}$/.test(val), { message: 'Postcode must be exactly 5 digits' }),
     }),
 
     ssn: z
       .string()
+      .min(1, { message: 'Ssn is required' })
       .transform((str) => str.trim())
       .refine((val) => /^\d{9}$/.test(val), { message: 'SSN must be exactly 9 digits' }),
   })
@@ -74,6 +83,7 @@ const registerValidator = z
 
 const usernameOrEmailValidator = z
   .string()
+  .min(1, { message: 'Username is required' })
   .transform((str) => str.trim())
   .refine(
     (val) => {
@@ -96,6 +106,7 @@ const loginValidator = z
     usernameOrEmail: usernameOrEmailValidator,
     password: z
       .string()
+      .min(1, { message: 'Password is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 8, { message: 'Password must be at least 8 characters' })
       .refine((val) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])/.test(val), {
@@ -203,13 +214,11 @@ const updateUserValidator = z
           .optional(),
         street: z
           .string()
-          .nonempty({ message: 'Street cannot be empty' })
           .transform((str) => str.trim())
           .refine((val) => val.length <= 50, { message: 'Street must be at most 50 characters' })
           .optional(),
         number: z
           .string()
-          .nonempty({ message: 'Street number cannot be empty' })
           .refine((val) => val.length <= 10, {
             message: 'Street number must be at most 10 characters',
           })
@@ -233,7 +242,7 @@ const changePasswordValidator = z
   .object({
     newPassword: z
       .string()
-      .nonempty({ message: 'New password is required' })
+      .min(1, { message: 'New Password is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 8, { message: 'Password must be at least 8 characters' })
       .refine((val) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])/.test(val), {
@@ -242,7 +251,7 @@ const changePasswordValidator = z
       }),
     currentPassword: z
       .string()
-      .nonempty({ message: 'Current password is required' })
+      .min(1, { message: 'Current Password is required' })
       .transform((str) => str.trim())
       .refine((val) => val.length >= 8, {
         message: 'Current password must be at least 8 characters',
