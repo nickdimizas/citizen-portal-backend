@@ -154,20 +154,11 @@ const getUserController = async (req: AuthenticatedRequest, res: Response): Prom
       return;
     }
 
-    // ✅ Adjust response data for self vs others
-    let responseData;
-    if (isSelfRequest) {
-      const { username, email, firstname, lastname, phoneNumber, address, ssn } = user;
-      responseData = { username, email, firstname, lastname, phoneNumber, address, ssn };
-    } else {
-      responseData = user;
-    }
-
     console.log(`User ${targetUserId} fetched successfully`);
     res.status(StatusCodes.OK).json({
       status: true,
       message: isSelfRequest ? 'Your profile fetched successfully' : 'User fetched successfully',
-      data: responseData,
+      data: user,
     });
   } catch (error) {
     console.error('Error fetching user:', error);
