@@ -81,35 +81,3 @@ If you have already created the database in the first steps and you want to reus
    ```
    http://localhost:5000
    ```
-
----
-
-## Production Mode (Independent)
-
-1. Clone this repository and install dependencies:
-
-   ```bash
-   git clone <backend-repo-url>
-   cd <backend-repo-folder>
-
-   ```
-
-2. Setup Docker environment,install, build and run backend:
-
-   ```bash
-   npm run setup:docker
-   ```
-
-3. Seed the database with a default admin user:
-
-   ```bash
-   npm run admin:seed:js
-   ```
-
-   - Default credentials: username: `admin` | password: `admin123!`
-   - You can change these credentials later in the app.
-
-4. You can now access the backend at:
-   ```
-   http://localhost:5000
-   ```
