@@ -90,7 +90,7 @@ const getUsers = async (options: GetUsersOptions): Promise<UserPaginationResult>
   const total = await User.countDocuments(query);
 
   return {
-    data: users,
+    users,
     pagination: {
       total,
       page,

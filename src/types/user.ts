@@ -11,7 +11,7 @@ interface GetUsersOptions {
 }
 
 interface UserPaginationResult {
-  data: IUser[];
+  users: IUser[];
   pagination: {
     total: number;
     page: number;

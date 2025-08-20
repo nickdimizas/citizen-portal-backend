@@ -102,7 +102,7 @@ const getUsersController = async (req: AuthenticatedRequest, res: Response): Pro
     res.status(StatusCodes.OK).json({
       status: true,
       message: 'Users fetched successfully',
-      data: result,
+      payload: result,
     });
   } catch (error) {
     console.error('Failed to fetch users:', error);
