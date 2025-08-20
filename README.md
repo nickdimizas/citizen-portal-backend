@@ -91,22 +91,16 @@ If you have already created the database in the first steps and you want to reus
    ```bash
    git clone <backend-repo-url>
    cd <backend-repo-folder>
-   npm install
+
    ```
 
-2. Build the project:
-
-   ```bash
-   npm run build
-   ```
-
-3. Setup Docker environment, build and run backend:
+2. Setup Docker environment,install, build and run backend:
 
    ```bash
    npm run setup:docker
    ```
 
-4. Seed the database with a default admin user:
+3. Seed the database with a default admin user:
 
    ```bash
    npm run admin:seed:js
@@ -115,7 +109,7 @@ If you have already created the database in the first steps and you want to reus
    - Default credentials: username: `admin` | password: `admin123!`
    - You can change these credentials later in the app.
 
-5. You can now access the backend at:
+4. You can now access the backend at:
    ```
    http://localhost:5000
    ```
