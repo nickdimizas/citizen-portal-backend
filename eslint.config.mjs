@@ -30,6 +30,7 @@ export default tseslint.config([
       ],
       'import/no-unresolved': 'error',
       'import/no-duplicates': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
     extends: [js.configs.recommended, ...tseslint.configs.recommended, eslintConfigPrettier],
     settings: {
@@ -37,6 +38,9 @@ export default tseslint.config([
         typescript: {
           alwaysTryTypes: true,
           project: './tsconfig.json',
+        },
+        node: {
+          extensions: ['.js', '.ts', '.json'],
         },
       },
     },
