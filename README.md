@@ -52,6 +52,8 @@ This repository contains the **backend** part of the Citizen Portal App.
 
 #### If you already have the database and users/data
 
+If you have already created the database in the first steps and you want to reuse the existing Docker volume (with all your current data), you can simply start the MongoDB container without creating a new volume:
+
 1. Clone this repository and install dependencies:
 
    ```bash
@@ -60,11 +62,14 @@ This repository contains the **backend** part of the Citizen Portal App.
    npm install
    ```
 
-2. Start existing MongoDB container:
+2. Start the existing MongoDB container:
 
    ```bash
    npm run db:run
    ```
+
+   > This command will **reuse the existing MongoDB volume**.  
+   > No new database or volume will be created.
 
 3. Start backend server:
 
