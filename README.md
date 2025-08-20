@@ -6,7 +6,7 @@ This repository contains the **backend** part of the Citizen Portal App.
 
 ### Prerequisites
 
-- Node.js (v18+ recommended)
+- Node.js 20.x (LTS) or 22.x (Current)
 - npm
 - Docker (for MongoDB container)
 
