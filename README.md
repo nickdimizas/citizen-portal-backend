@@ -14,13 +14,21 @@ This repository contains the **backend** part of the Citizen Portal App.
 
 #### If this is your first time using the app
 
-1. Create MongoDB container with initial database:
+1. Clone this repository and install dependencies:
+
+   ```bash
+   git clone <backend-repo-url>
+   cd <backend-repo-folder>
+   npm install
+   ```
+
+2. Create MongoDB container with initial database:
 
    ```bash
    npm run db:create
    ```
 
-2. Seed the database with a default admin user:
+3. Seed the database with a default admin user:
 
    ```bash
    npm run admin:seed:ts
@@ -29,48 +37,80 @@ This repository contains the **backend** part of the Citizen Portal App.
    - Default credentials: username: `admin` | password: `admin123!`
    - You can change these credentials later in the app.
 
+4. Start backend server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. You can now access the backend at:
+   ```
+   http://localhost:5000
+   ```
+
+---
+
+#### If you already have the database and users/data
+
+1. Clone this repository and install dependencies:
+
+   ```bash
+   git clone <backend-repo-url>
+   cd <backend-repo-folder>
+   npm install
+   ```
+
+2. Start existing MongoDB container:
+
+   ```bash
+   npm run db:run
+   ```
+
 3. Start backend server:
 
    ```bash
    npm run dev
    ```
 
-4. Access backend at:
-
+4. You can now access the backend at:
    ```
    http://localhost:5000
    ```
 
-#### If you already have the database and users/data
+---
 
-1. Start existing MongoDB container:
+## Production Mode (Independent)
 
-   ```bash
-   npm run db:run
-   ```
-
-2. Start backend server:
+1. Clone this repository and install dependencies:
 
    ```bash
-   npm run dev
+   git clone <backend-repo-url>
+   cd <backend-repo-folder>
+   npm install
    ```
 
-3. Access backend at:
+2. Build the project:
 
+   ```bash
+   npm run build
    ```
-   http://localhost:5000
-   ```
 
-### Production Mode (Independent)
-
-1. Setup Docker environment and run backend:
+3. Setup Docker environment, build and run backend:
 
    ```bash
    npm run setup:docker
+   ```
+
+4. Seed the database with a default admin user:
+
+   ```bash
    npm run admin:seed:js
    ```
 
    - Default credentials: username: `admin` | password: `admin123!`
    - You can change these credentials later in the app.
 
-2. Backend runs on its configured port (default 5000).
+5. You can now access the backend at:
+   ```
+   http://localhost:5000
+   ```
