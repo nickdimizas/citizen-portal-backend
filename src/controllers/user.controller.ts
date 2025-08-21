@@ -98,11 +98,16 @@ const getUsersController = async (req: AuthenticatedRequest, res: Response): Pro
       roleFilter: allowedRoles,
     });
 
+    const usersWithId = {
+      ...result,
+      users: result.users.map((u) => ({ ...u.toObject(), id: u._id })),
+    };
+
     console.log(`Users fetched successfully for role ${userRole}`);
     res.status(StatusCodes.OK).json({
       status: true,
       message: 'Users fetched successfully',
-      payload: result,
+      payload: usersWithId,
     });
   } catch (error) {
     console.error('Failed to fetch users:', error);
@@ -158,7 +163,7 @@ const getUserController = async (req: AuthenticatedRequest, res: Response): Prom
     res.status(StatusCodes.OK).json({
       status: true,
       message: isSelfRequest ? 'Your profile fetched successfully' : 'User fetched successfully',
-      data: user,
+      data: { ...user.toObject(), id: user._id },
     });
   } catch (error) {
     console.error('Error fetching user:', error);
