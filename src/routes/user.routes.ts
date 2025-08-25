@@ -33,7 +33,12 @@ router.patch(
   verifyRole([UserRole.Admin, UserRole.Employee]),
   updateUserController,
 );
-router.patch('/:id/active', verifyToken, verifyRole([UserRole.Admin]), toggleUserActiveController);
+router.patch(
+  '/:id/active',
+  verifyToken,
+  verifyRole([UserRole.Admin, UserRole.Employee]),
+  toggleUserActiveController,
+);
 router.patch('/:id/role', verifyToken, verifyRole([UserRole.Admin]), changeUserRoleController);
 
 export default router;

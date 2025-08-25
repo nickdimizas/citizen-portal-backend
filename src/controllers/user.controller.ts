@@ -178,7 +178,7 @@ const getUserController = async (req: AuthenticatedRequest, res: Response): Prom
 
 const updateUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user?.id || !req.user?.role) {
+    if (!req.user) {
       console.warn('Unauthorized update attempt: missing user id or role');
       res.status(StatusCodes.UNAUTHORIZED).json({
         status: false,
@@ -197,7 +197,7 @@ const updateUserController = async (req: AuthenticatedRequest, res: Response): P
       return;
     }
 
-    if (req.user.role === 'citizen' && targetUserId !== req.user.id) {
+    if (req.user.role === UserRole.Citizen && targetUserId !== req.user.id) {
       console.warn(`Forbidden update attempt by citizen ${req.user.id} on user ${targetUserId}`);
       res
         .status(StatusCodes.FORBIDDEN)
@@ -206,8 +206,8 @@ const updateUserController = async (req: AuthenticatedRequest, res: Response): P
     }
 
     if (
-      req.user.role === 'employee' &&
-      targetUser.role !== 'citizen' &&
+      req.user.role === UserRole.Employee &&
+      targetUser.role !== UserRole.Citizen &&
       targetUserId !== req.user.id
     ) {
       console.warn(
@@ -279,6 +279,15 @@ const toggleUserActiveController = async (
   res: Response,
 ): Promise<void> => {
   try {
+    if (!req.user) {
+      console.warn('Unauthorized access attempt: missing user object');
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized',
+      });
+      return;
+    }
+
     const { id } = req.params;
 
     const user = await getUserById(id);
@@ -287,6 +296,14 @@ const toggleUserActiveController = async (
       res.status(StatusCodes.NOT_FOUND).json({
         status: false,
         message: 'User not found',
+      });
+      return;
+    }
+
+    if (req.user.role === UserRole.Employee && user.role !== UserRole.Citizen) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        status: false,
+        message: 'Employees can only toggle citizens',
       });
       return;
     }
