@@ -205,7 +205,11 @@ const updateUserController = async (req: AuthenticatedRequest, res: Response): P
       return;
     }
 
-    if (req.user.role === 'employee' && targetUser.role !== 'citizen') {
+    if (
+      req.user.role === 'employee' &&
+      targetUser.role !== 'citizen' &&
+      targetUserId !== req.user.id
+    ) {
       console.warn(
         `Forbidden update attempt by employee ${req.user.id} on non-citizen user ${targetUserId}`,
       );
