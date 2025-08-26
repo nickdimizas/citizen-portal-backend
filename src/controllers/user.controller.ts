@@ -3,7 +3,13 @@ import { ZodError } from 'zod';
 
 import { StatusCodes } from '../constants/statusCodes';
 import { IUser, User, UserRole } from '../models/user.model';
-import { createUser, getUserById, getUsers, updateUser } from '../services/user.service';
+import {
+  createUser,
+  deleteUserById,
+  getUserById,
+  getUsers,
+  updateUser,
+} from '../services/user.service';
 import { AuthenticatedRequest } from '../types/authenticated-request';
 import { extractErrorMessage } from '../utils/errorHandler';
 import {
@@ -274,6 +280,56 @@ const updateUserController = async (req: AuthenticatedRequest, res: Response): P
   }
 };
 
+const deleteUserController = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        status: false,
+        message: 'Unauthorized',
+      });
+      return;
+    }
+
+    if (req.user.role !== UserRole.Admin) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        status: false,
+        message: 'Forbidden: Only admins can delete users',
+      });
+      return;
+    }
+
+    const deletedUser = await deleteUserById(id);
+
+    if (!deletedUser) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        status: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      status: true,
+      message: `User ${deletedUser.username} deleted successfully`,
+      data: {
+        id: deletedUser.id,
+        username: deletedUser.username,
+        email: deletedUser.email,
+      },
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    const errorMessage = extractErrorMessage(error as Error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: false,
+      message: 'Failed to delete user',
+      error: errorMessage,
+    });
+  }
+};
+
 const toggleUserActiveController = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -457,4 +513,5 @@ export {
   toggleUserActiveController,
   changeUserRoleController,
   changePasswordController,
+  deleteUserController,
 };

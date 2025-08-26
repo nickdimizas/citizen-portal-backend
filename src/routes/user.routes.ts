@@ -9,6 +9,7 @@ import {
   toggleUserActiveController,
   changeUserRoleController,
   changePasswordController,
+  deleteUserController,
 } from '../controllers/user.controller';
 import { UserRole } from '../models/user.model';
 
@@ -40,5 +41,6 @@ router.patch(
   toggleUserActiveController,
 );
 router.patch('/:id/role', verifyToken, verifyRole([UserRole.Admin]), changeUserRoleController);
+router.delete('/:id', verifyToken, verifyRole([UserRole.Admin]), deleteUserController);
 
 export default router;

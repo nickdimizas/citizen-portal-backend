@@ -132,6 +132,10 @@ const updateUser = async (userId: string, data: UpdateUserInput): Promise<Update
   return data;
 };
 
+const deleteUserById = async (id: string): Promise<IUser | null> => {
+  return User.findByIdAndDelete(id);
+};
+
 export {
   createUser,
   getUserByUsernameOrEmail,
@@ -139,4 +143,5 @@ export {
   getUsers,
   getUserById,
   updateUser,
+  deleteUserById,
 };
