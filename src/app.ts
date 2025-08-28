@@ -1,9 +1,9 @@
 import express, { Application, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc, { Options } from 'swagger-jsdoc';
 import cors from 'cors';
 
+import { swaggerSpec } from './swagger';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 const app: Application = express();
@@ -15,21 +15,6 @@ app.use(
   }),
 );
 
-const swaggerOptions: Options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Citizen Portal API',
-      version: '1.0.0',
-      description: 'Minimal setup for API documentation',
-    },
-  },
-  apis: ['./src/routes/**/*.ts'],
-};
-
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use(express.json());
 app.use(cookieParser());
 
@@ -39,5 +24,7 @@ app.use('/api/users', userRoutes);
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello from the Express Typescript Backend!');
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 export default app;
