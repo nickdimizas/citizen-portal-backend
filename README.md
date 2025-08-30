@@ -30,9 +30,9 @@ The application allows citizens to register, log in, and administrators to manag
 
 ### **Prerequisites**
 
-- **Node.js**: Version 18+ recommended
-- **Docker**: Required to run the MongoDB container for local development
-- **npm**: Node.js package manager
+- **Node.js**: Version 22+ recommended
+- **Docker**: Required only if you want to use the provided local MongoDB setup.  
+  If you plan to connect to your own MongoDB instance, Docker is not needed.
 
 ---
 
@@ -62,14 +62,14 @@ This method uses the provided Docker script to set up a local MongoDB instance w
     cp .env.example .env
     ```
 
-    - The `MONGO_URI` in `.env.example` is pre-configured for the Docker setup with the correct credentials (`appuser:app_password`).  
-      **Do not change these values unless you are connecting to your own MongoDB instance.**
-
     - Generate a `JWT_SECRET` and add it to your `.env` file:
 
     ```bash
     node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
     ```
+
+    - The `MONGO_URI` in `.env.example` is pre-configured for the Docker setup with the correct credentials (`appuser:app_password`).  
+      **Do not change these values unless you are connecting to your own MongoDB instance.**
 
 4.  **Create and start the database:**
     - Run the Docker script to pull the MongoDB image, create a container, and initialize the database and user:
@@ -103,7 +103,8 @@ If you prefer to use an existing MongoDB instance, you can skip the Docker comma
 
     **Note:** If you are using your own MongoDB instance, it must include:
     - An application user with `readWrite` access
-    - A `users` collection (required for authentication)
+    - A `users` collection containing at least one admin user.  
+      Passwords are hashed by the backend using bcrypt (10 salt rounds); if creating an admin manually, ensure the password is hashed accordingly. All required fields and validation rules are defined in the `User` model/schema.
 
 ---
 
