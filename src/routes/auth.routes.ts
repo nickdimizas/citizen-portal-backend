@@ -10,7 +10,7 @@ const router = Router();
 
 /**
  * @openapi
- * /api/auth/register:
+ * /api/register:
  *   post:
  *     tags:
  *       - Auth
@@ -21,8 +21,8 @@ const router = Router();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/UserRegister'
- *      responses:
- *        201:
+ *     responses:
+ *       201:
  *         description: User registered successfully
  *         content:
  *           application/json:
@@ -38,7 +38,7 @@ router.post('/register', registerController);
 
 /**
  * @openapi
- * /api/auth/login:
+ * /api/login:
  *   post:
  *     tags:
  *       - Auth
@@ -68,7 +68,7 @@ router.post('/login', loginController);
 
 /**
  * @openapi
- * /api/auth/logout:
+ * /api/logout:
  *   post:
  *     tags:
  *       - Auth

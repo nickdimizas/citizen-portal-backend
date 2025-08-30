@@ -131,6 +131,120 @@ router.get('/me', verifyToken, getUserController);
 router.patch('/me', verifyToken, updateUserController);
 router.patch('/me/password', verifyToken, changePasswordController);
 
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   get:
+ *     tags:
+ *       - Users
+ *     summary: Get user by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponseUserProfile'
+ *       404:
+ *         description: User not found
+ *
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Update user by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserUpdateProfile'
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponseUserUpdate'
+ *       404:
+ *         description: User not found
+ *
+ *   delete:
+ *     tags:
+ *       - Users
+ *     summary: Delete user by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponseMessage'
+ *       404:
+ *         description: User not found
+ *
+ * /api/users/{id}/active:
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Toggle user's active status
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User active status toggled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponseUserActive'
+ *
+ * /api/users/{id}/role:
+ *   patch:
+ *     tags:
+ *       - Users
+ *     summary: Change user's role
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserChangeRole'
+ *     responses:
+ *       200:
+ *         description: User role changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponseUserRole'
+ */
+
 router.get('/:id', verifyToken, verifyRole([UserRole.Admin, UserRole.Employee]), getUserController);
 router.patch(
   '/:id',

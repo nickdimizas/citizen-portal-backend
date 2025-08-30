@@ -22,7 +22,7 @@ app.use('/api', authRoutes);
 app.use('/api/users', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Hello from the Express Typescript Backend!');
+  res.json({ message: 'API is running 🚀' });
 });
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
