@@ -18,23 +18,21 @@ A citizen portal application built with Node.js, Express, and MongoDB
 
 ### **Overview**
 
-The **Citizen Portal Backend** is the service layer of a web application that allows citizens to securely access municipal services, personal information, and service requests. It is designed to provide a scalable, reliable, and secure API that connects the frontend interface with the database.
+This is a backend for a citizen portal application. It provides user authentication, administration, and basic citizen services. The project uses:
 
-Key features include:
+- **Node.js** and **Express** for the backend server
+- **MongoDB** for the database
+- **JWT** for authentication
 
-- **User authentication and authorization** using JWT.
-- **Citizen profile management** for storing and updating user data.
-- **Service request handling** to allow citizens to submit and track requests.
-- **Notifications and communication** with the frontend.
-
-The backend is built with **Node.js** and **Express.js** for handling API requests, **MongoDB** for flexible and scalable data storage, and **Docker** to simplify local development and deployment.
+The application allows citizens to register, log in, and administrators to manage user data securely.
 
 ---
 
 ### **Prerequisites**
 
-- **Node.js**: v22.x or higher.
-- **Docker**: Required if you want to run MongoDB in a container for local development.
+- **Node.js**: Version 18+ recommended
+- **Docker**: Required to run the MongoDB container for local development
+- **npm**: Node.js package manager
 
 ---
 
@@ -58,26 +56,41 @@ This method uses the provided Docker script to set up a local MongoDB instance w
     ```
 
 3.  **Set up environment variables:**
-    - Copy the `.env.example` file to create your `.env` file. The `MONGO_URI` is pre-configured to work with the Docker setup.
+    - Copy `.env.example` to create your `.env` file.
 
     ```bash
     cp .env.example .env
     ```
 
-    - The `MONGO_URI` in `.env.example` is already pre-configured with the correct credentials (`appuser:app_password`) for the Docker setup.  
+    - The `MONGO_URI` in `.env.example` is pre-configured for the Docker setup with the correct credentials (`appuser:app_password`).  
       **Do not change these values unless you are connecting to your own MongoDB instance.**
 
-    - You will need to generate a `JWT_SECRET` and add it to your new `.env` file. You can use the following command to generate a secure secret:
+    - Generate a `JWT_SECRET` and add it to your `.env` file:
 
     ```bash
     node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
     ```
 
 4.  **Create and start the database:**
-    - Run the Docker script to pull the MongoDB image, create a container, and run the `mongo-init.js` script to set up a non-root user and seed the database.
+    - Run the Docker script to pull the MongoDB image, create a container, and initialize the database and user:
+
     ```bash
     npm run db:create
     ```
+
+5.  **Seed the default admin user:**
+    - This script creates a default admin user with the following credentials:
+      - **Username:** admin
+      - **Password:** admin123!
+    - Developers can log in with these credentials immediately and change the password afterward.
+
+    ```bash
+    npm run admin:seed:ts
+    ```
+
+    > ⚠️ After logging in, it is strongly recommended to change the default password.
+
+---
 
 #### **Option 2: Use Your Own MongoDB**
 
@@ -89,8 +102,8 @@ If you prefer to use an existing MongoDB instance, you can skip the Docker comma
     - In your `.env` file, replace the default `MONGO_URI` with your own connection string.
 
     **Note:** If you are using your own MongoDB instance, it must include:
-    - An application user with `readWrite` access.
-    - A `users` collection (required for authentication).
+    - An application user with `readWrite` access
+    - A `users` collection (required for authentication)
 
 ---
 
@@ -110,100 +123,8 @@ Copy `.env.example` to `.env` and update the values where necessary.
 
 ### **Running the Application**
 
-After completing one of the setup options, you can start the application:
+After completing one of the setup options, you can start the application for development:
 
-````bash
+```bash
 npm run dev
-
-
-
-
-
-
-
-
-
-
-# Citizen Portal Backend Repo
-
-This repository contains the **backend** part of the Citizen Portal App.
-
-## Development Mode (Local)
-
-### Prerequisites
-
-- Node.js 20.x (LTS) or 22.x (Current)
-- npm
-- Docker (for MongoDB container)
-
-### Run Locally
-
-#### If this is your first time using the app
-
-1. Clone this repository and install dependencies:
-
-   ```bash
-   git clone <backend-repo-url>
-   cd <backend-repo-folder>
-   npm install
-````
-
-2. Create MongoDB container with initial database:
-
-   ```bash
-   npm run db:create
-   ```
-
-3. Seed the database with a default admin user:
-
-   ```bash
-   npm run admin:seed:ts
-   ```
-
-   - Default credentials: username: `admin` | password: `admin123!`
-   - You can change these credentials later in the app.
-
-4. Start backend server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. You can now access the backend at:
-   ```
-   http://localhost:5000
-   ```
-
----
-
-#### If you already have the database and users/data
-
-If you have already created the database in the first steps and you want to reuse the existing Docker volume (with all your current data), you can simply start the MongoDB container without creating a new volume:
-
-1. Clone this repository and install dependencies:
-
-   ```bash
-   git clone <backend-repo-url>
-   cd <backend-repo-folder>
-   npm install
-   ```
-
-2. Start the existing MongoDB container:
-
-   ```bash
-   npm run db:run
-   ```
-
-   > This command will **reuse the existing MongoDB volume**.  
-   > No new database or volume will be created.
-
-3. Start backend server:
-
-   ```bash
-   npm run dev
-   ```
-
-4. You can now access the backend at:
-   ```
-   http://localhost:5000
-   ```
+```
