@@ -75,7 +75,7 @@ This method uses the provided Docker script to set up a local MongoDB instance w
     - Run the Docker script to pull the MongoDB image, create a container, and initialize the database and user:
 
     ```bash
-    npm run db:create
+    npm run setup:db
     ```
 
 5.  **Seed the default admin user:**
