@@ -1,4 +1,4 @@
-# Project Title 🚀
+# Project Title
 
 A citizen portal application built with Node.js, Express, and MongoDB
 
