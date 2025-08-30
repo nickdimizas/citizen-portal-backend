@@ -1,4 +1,4 @@
-# Project Title
+# Citizen Portal Backend
 
 A citizen portal application built with Node.js, Express, and MongoDB
 
@@ -24,13 +24,13 @@ This is a backend for a citizen portal application. It provides user authenticat
 - **MongoDB** for the database
 - **JWT** for authentication
 
-The application allows citizens to register, log in, and administrators to manage user data securely.
+The application allows citizens to register, log in, and administrators to manage user data securely. It is designed to be used with the [Citizen Portal Frontend](https://github.com/nickdimizas/citizen-portal-frontend.git).
 
 ---
 
 ### **Prerequisites**
 
-- **Node.js**: Version 22+ recommended
+- **Node.js**: Version 20.x (LTS) or 22.x (Current) recommended
 - **Docker**: Required only if you want to use the provided local MongoDB setup.  
   If you plan to connect to your own MongoDB instance, Docker is not needed.
 
