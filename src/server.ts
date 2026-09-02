@@ -12,16 +12,19 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
+const startServer = async (): Promise<void> => {
+  try {
+    await mongoose.connect(MONGO_URI);
     console.log('Connection to MongoDB established');
+
     app.listen(PORT, () => {
       console.log('Server is up and running');
       console.log(`Access it at: http://localhost:${PORT}`);
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.log('Failed to connect to MongoDB:', error);
     process.exit(1);
-  });
+  }
+};
+
+startServer();
